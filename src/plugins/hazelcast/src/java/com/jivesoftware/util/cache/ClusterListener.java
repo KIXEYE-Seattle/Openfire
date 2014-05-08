@@ -470,18 +470,23 @@ public class ClusterListener implements MembershipListener, LifecycleListener {
 
         Collection<JID> getHandlers(EntryEvent event) {
             Object value = event.getValue();
-            Collection<JID> answer = new ArrayList<JID>();
-            for (DirectedPresence directedPresence : (Collection<DirectedPresence>)value) {
-                answer.add(directedPresence.getHandler());
+            if (value != null) {
+                Collection<JID> answer = new ArrayList<JID>();
+                for (DirectedPresence directedPresence : (Collection<DirectedPresence>) value) {
+                    answer.add(directedPresence.getHandler());
+                }
+                return answer;
             }
-            return answer;
+            return Collections.emptyList();
         }
 
         Set<String> getReceivers(EntryEvent event, JID handler) {
             Object value = event.getValue();
-            for (DirectedPresence directedPresence : (Collection<DirectedPresence>)value) {
-                if (directedPresence.getHandler().equals(handler)) {
-                    return directedPresence.getReceivers();
+            if (value != null) {
+                for (DirectedPresence directedPresence : (Collection<DirectedPresence>) value) {
+                    if (directedPresence.getHandler().equals(handler)) {
+                        return directedPresence.getReceivers();
+                    }
                 }
             }
             return Collections.emptySet();
