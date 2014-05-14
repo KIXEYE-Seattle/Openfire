@@ -52,6 +52,7 @@ import org.jivesoftware.openfire.commands.AdHocCommandHandler;
 import org.jivesoftware.openfire.component.InternalComponentManager;
 import org.jivesoftware.openfire.container.AdminConsolePlugin;
 import org.jivesoftware.openfire.container.Module;
+import org.jivesoftware.openfire.container.ModuleProvider;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.disco.IQDiscoInfoHandler;
 import org.jivesoftware.openfire.disco.IQDiscoItemsHandler;
@@ -146,7 +147,7 @@ public class XMPPServer {
     /**
      * All modules loaded by this server
      */
-    private Map<Class, Module> modules = new LinkedHashMap<Class, Module>();
+    private final ModuleProvider modules;
 
     /**
      * Listeners that will be notified when the server has started or is about to be stopped.
@@ -189,11 +190,16 @@ public class XMPPServer {
      * Creates a server and starts it.
      */
     public XMPPServer() {
+        this(new DefaultModuleProvider());
+    }
+
+    public XMPPServer(ModuleProvider modules) {
         // We may only have one instance of the server running on the JVM
         if (instance != null) {
             throw new IllegalStateException("A server is already running");
         }
-        instance = this;
+        this.modules = modules;
+        this.instance = this;
         start();
     }
 
@@ -436,13 +442,9 @@ public class XMPPServer {
                         }
 
                         verifyDataSource();
-                        // First load all the modules so that modules may access other modules while
-                        // being initialized
-                        loadModules();
-                        // Initize all the modules
-                        initModules();
-                        // Start all the modules
-                        startModules();
+
+                        // Load, initialize, and start all the modules
+                        modules.initialize(XMPPServer.this,loader,Log);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -470,13 +472,8 @@ public class XMPPServer {
             // If the server has already been setup then we can start all the server's modules
             if (!setupMode) {
                 verifyDataSource();
-                // First load all the modules so that modules may access other modules while
-                // being initialized
-                loadModules();
-                // Initize all the modules
-                initModules();
-                // Start all the modules
-                startModules();
+                // Load, initialize, and start the modules
+                modules.initialize(this,loader,Log);
             }
             // Initialize statistics
             ServerTrafficCounter.initStatistics();
@@ -502,126 +499,6 @@ public class XMPPServer {
             Log.error(e.getMessage(), e);
             System.out.println(LocaleUtils.getLocalizedString("startup.error"));
             shutdownServer();
-        }
-    }
-
-    private void loadModules() {
-        // Load boot modules
-        loadModule(RoutingTableImpl.class.getName());
-        loadModule(AuditManagerImpl.class.getName());
-        loadModule(RosterManager.class.getName());
-        loadModule(PrivateStorage.class.getName());
-        // Load core modules
-        loadModule(PresenceManagerImpl.class.getName());
-        loadModule(SessionManager.class.getName());
-        loadModule(PacketRouterImpl.class.getName());
-        loadModule(IQRouter.class.getName());
-        loadModule(MessageRouter.class.getName());
-        loadModule(PresenceRouter.class.getName());
-        loadModule(MulticastRouter.class.getName());
-        loadModule(PacketTransporterImpl.class.getName());
-        loadModule(PacketDelivererImpl.class.getName());
-        loadModule(TransportHandler.class.getName());
-        loadModule(OfflineMessageStrategy.class.getName());
-        loadModule(OfflineMessageStore.class.getName());
-        loadModule(VCardManager.class.getName());
-        // Load standard modules
-        loadModule(IQBindHandler.class.getName());
-        loadModule(IQSessionEstablishmentHandler.class.getName());
-        loadModule(IQAuthHandler.class.getName());
-        loadModule(IQPingHandler.class.getName());
-        loadModule(IQPrivateHandler.class.getName());
-        loadModule(IQRegisterHandler.class.getName());
-        loadModule(IQRosterHandler.class.getName());
-        loadModule(IQTimeHandler.class.getName());
-        loadModule(IQEntityTimeHandler.class.getName());
-        loadModule(IQvCardHandler.class.getName());
-        loadModule(IQVersionHandler.class.getName());
-        loadModule(IQLastActivityHandler.class.getName());
-        loadModule(PresenceSubscribeHandler.class.getName());
-        loadModule(PresenceUpdateHandler.class.getName());
-        loadModule(IQOfflineMessagesHandler.class.getName());
-        loadModule(IQPEPHandler.class.getName());
-        loadModule(IQPEPOwnerHandler.class.getName());
-        loadModule(MulticastDNSService.class.getName());
-        loadModule(IQSharedGroupHandler.class.getName());
-        loadModule(AdHocCommandHandler.class.getName());
-        loadModule(IQPrivacyHandler.class.getName());
-        loadModule(DefaultFileTransferManager.class.getName());
-        loadModule(FileTransferProxy.class.getName());
-        loadModule(MediaProxyService.class.getName());
-        loadModule(PubSubModule.class.getName());
-        loadModule(IQDiscoInfoHandler.class.getName());
-        loadModule(IQDiscoItemsHandler.class.getName());
-        loadModule(UpdateManager.class.getName());
-        loadModule(FlashCrossDomainHandler.class.getName());
-        loadModule(InternalComponentManager.class.getName());
-        loadModule(MultiUserChatManager.class.getName());
-        loadModule(ClearspaceManager.class.getName());
-        loadModule(IQMessageCarbonsHandler.class.getName());
-
-        // Load this module always last since we don't want to start listening for clients
-        // before the rest of the modules have been started
-        loadModule(ConnectionManagerImpl.class.getName());
-        // Keep a reference to the internal component manager
-        componentManager = getComponentManager();
-    }
-
-    /**
-     * Loads a module.
-     *
-     * @param module the name of the class that implements the Module interface.
-     */
-    private void loadModule(String module) {
-        try {
-            Class modClass = loader.loadClass(module);
-            Module mod = (Module) modClass.newInstance();
-            this.modules.put(modClass, mod);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-        }
-    }
-
-    private void initModules() {
-        for (Module module : modules.values()) {
-            boolean isInitialized = false;
-            try {
-                module.initialize(this);
-                isInitialized = true;
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                // Remove the failed initialized module
-                this.modules.remove(module.getClass());
-                if (isInitialized) {
-                    module.stop();
-                    module.destroy();
-                }
-                Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-            }
-        }
-    }
-
-    /**
-     * <p>Following the loading and initialization of all the modules
-     * this method is called to iterate through the known modules and
-     * start them.</p>
-     */
-    private void startModules() {
-        for (Module module : modules.values()) {
-            boolean started = false;
-            try {
-                module.start();
-            }
-            catch (Exception e) {
-                if (started && module != null) {
-                    module.stop();
-                    module.destroy();
-                }
-                Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-            }
         }
     }
 
@@ -957,20 +834,15 @@ public class XMPPServer {
         		Log.error("Exception during listener shutdown", ex);
         	}
         }
+
         // If we don't have modules then the server has already been shutdown
         if (modules.isEmpty()) {
             return;
         }
-    	Log.info("Shutting down " + modules.size() + " modules ...");
-        // Get all modules and stop and destroy them
-        for (Module module : modules.values()) {
-        	try {
-	            module.stop();
-	            module.destroy();
-        	} catch (Exception ex) {
-        		Log.error("Exception during module shutdown", ex);
-        	}
-        }
+
+        // Stop all the modules
+        modules.shutdown(Log);
+
         // Stop all plugins
     	Log.info("Shutting down plugins ...");
         if (pluginManager != null) {
@@ -980,7 +852,7 @@ public class XMPPServer {
         		Log.error("Exception during plugin shutdown", ex);
         	}
         }
-        modules.clear();
+
         // Stop the Db connection manager.
         try {	
         	DbConnectionManager.destroyConnectionProvider();
