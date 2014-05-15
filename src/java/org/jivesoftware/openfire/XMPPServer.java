@@ -147,7 +147,7 @@ public class XMPPServer {
     /**
      * All modules loaded by this server
      */
-    private ModuleProvider modules = new DefaultModuleProvider();
+    private final ModuleProvider modules;
 
     /**
      * Listeners that will be notified when the server has started or is about to be stopped.
@@ -190,11 +190,16 @@ public class XMPPServer {
      * Creates a server and starts it.
      */
     public XMPPServer() {
+        this(new DefaultModuleProvider());
+    }
+
+    public XMPPServer(ModuleProvider modules) {
         // We may only have one instance of the server running on the JVM
         if (instance != null) {
             throw new IllegalStateException("A server is already running");
         }
-        instance = this;
+        this.modules = modules;
+        this.instance = this;
         start();
     }
 
