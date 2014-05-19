@@ -85,22 +85,28 @@ public class Roster implements Cacheable, Externalizable {
      */
     protected ConcurrentHashMap<String, Set<String>> implicitFrom = new ConcurrentHashMap<String, Set<String>>();
 
-    private RosterItemProvider rosterItemProvider;
+    private transient RosterItemProvider rosterItemProvider;
     private String username;
-    private SessionManager sessionManager;
-    private XMPPServer server = XMPPServer.getInstance();
-    private RoutingTable routingTable;
-    private PresenceManager presenceManager;
+    private transient SessionManager sessionManager;
+    private transient XMPPServer server;
+    private transient RoutingTable routingTable;
+    private transient PresenceManager presenceManager;
     /**
      * Note: Used only for shared groups logic.
      */
-    private RosterManager rosterManager;
+    private transient RosterManager rosterManager;
 
 
     /**
      * Constructor added for Externalizable. Do not use this constructor.
      */
     public Roster() {
+        server = XMPPServer.getInstance();
+        presenceManager = XMPPServer.getInstance().getPresenceManager();
+        rosterManager = XMPPServer.getInstance().getRosterManager();
+        sessionManager = SessionManager.getInstance();
+        rosterItemProvider = RosterManager.getRosterItemProvider();
+        routingTable = XMPPServer.getInstance().getRoutingTable();
     }
 
     /**
@@ -118,10 +124,8 @@ public class Roster implements Cacheable, Externalizable {
      * @param username The username of the user that owns this roster
      */
     Roster(String username) {
-        presenceManager = XMPPServer.getInstance().getPresenceManager();
-        rosterManager = XMPPServer.getInstance().getRosterManager();
-        sessionManager = SessionManager.getInstance();
-        routingTable = XMPPServer.getInstance().getRoutingTable();
+        this();
+
         this.username = username;
 
         // Get the shared groups of this user
@@ -1120,12 +1124,6 @@ public class Roster implements Cacheable, Externalizable {
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        presenceManager = XMPPServer.getInstance().getPresenceManager();
-        rosterManager = XMPPServer.getInstance().getRosterManager();
-        sessionManager = SessionManager.getInstance();
-        rosterItemProvider = RosterManager.getRosterItemProvider();
-        routingTable = XMPPServer.getInstance().getRoutingTable();
-
         username = ExternalizableUtil.getInstance().readSafeUTF(in);
         ExternalizableUtil.getInstance().readExternalizableMap(in, rosterItems, getClass().getClassLoader());
         ExternalizableUtil.getInstance().readStringsMap(in, implicitFrom);
