@@ -61,6 +61,7 @@
     String naturalName = ParamUtils.getParameter(request,"roomconfig_roomname");
     String description = ParamUtils.getParameter(request,"roomconfig_roomdesc");
     String maxUsers = ParamUtils.getParameter(request, "roomconfig_maxusers");
+    String blockInitialPresence = ParamUtils.getParameter(request, "roomconfig_blockinitialpresence");
     String broadcastModerator = ParamUtils.getParameter(request, "roomconfig_presencebroadcast");
     String broadcastParticipant = ParamUtils.getParameter(request, "roomconfig_presencebroadcast2");
     String broadcastVisitor = ParamUtils.getParameter(request, "roomconfig_presencebroadcast3");
@@ -185,6 +186,10 @@
 
             field = new XFormFieldImpl("muc#roomconfig_maxusers");
             field.addValue(maxUsers);
+            dataForm.addField(field);
+
+            field = new XFormFieldImpl("muc#roomconfig_blockinitialpresence");
+            field.addValue((blockInitialPresence == null) ? "0" : "1");
             dataForm.addField(field);
 
             field = new XFormFieldImpl("muc#roomconfig_presencebroadcast");
@@ -315,6 +320,7 @@
             description = room.getDescription();
             roomSubject = room.getSubject();
             maxUsers = Integer.toString(room.getMaxUsers());
+            blockInitialPresence = Boolean.toString(room.blockInitialPresence());
             broadcastModerator = Boolean.toString(room.canBroadcastPresence("moderator"));
             broadcastParticipant = Boolean.toString(room.canBroadcastPresence("participant"));
             broadcastVisitor = Boolean.toString(room.canBroadcastPresence("visitor"));
@@ -585,6 +591,10 @@
             <tr>
                 <td><input type="checkbox" name="roomconfig_enablelogging" value="true" id="enablelogging" <% if ("true".equals(enableLog)) out.write("checked");%>>
                     <LABEL FOR="enablelogging"><fmt:message key="muc.room.edit.form.log" /></LABEL></td>
+            </tr>
+            <tr>
+                <td><input type="checkbox" name="roomconfig_blockinitialpresence" value="true" id="blockInitialPresence" <% if ("true".equals(blockInitialPresence)) out.write("checked");%>>
+                    <LABEL FOR="blockInitialPresence"><fmt:message key="muc.room.edit.form.blockinitialpresence" /></LABEL></td>
             </tr>
         </tbody>
         </table>

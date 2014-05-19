@@ -111,6 +111,7 @@ public abstract class MUCEventDelegate {
             room.setChangeNickname("1".equals(roomConfig.get("x-muc#roomconfig_canchangenick")));
             room.setRegistrationEnabled("1".equals(roomConfig.get("x-muc#roomconfig_registration")));
             room.setPersistent("1".equals(roomConfig.get("muc#roomconfig_persistentroom")));
+            room.setBlockInitialPresence("1".equals(roomConfig.get("muc#roomconfig_blockinitialpresence")));
             
             final String property = roomConfig.get("muc#roomconfig_roomowners");
             if (property != null) {

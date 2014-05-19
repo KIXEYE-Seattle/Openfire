@@ -20,6 +20,7 @@
 
 package org.jivesoftware.xmpp.workgroup;
 
+import java.lang.String;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.Date;
@@ -823,6 +824,10 @@ public class Workgroup {
             values = new ArrayList<String>();
             values.add("0");
             fields.put("anonymous", values);
+            // Set if initial presence is broadcast
+            values = new ArrayList<String>();
+            values.add("0");
+            fields.put("muc@roomconfig_blockinitialpresence", values);
             // Only broadcast presences of participants and visitors
             values = new ArrayList<String>();
             values.add("participant");
@@ -1674,6 +1679,10 @@ public class Workgroup {
         values = new ArrayList<String>();
         values.add("moderators");
         fields.put("muc#roomconfig_whois", values);
+        // Set if initial presence is sent
+        values = new ArrayList<String>();
+        values.add("0");
+        fields.put("muc#roomconfig_blockinitialpresence", values);
         // Only broadcast presences of participants and visitors
         values = new ArrayList<String>();
         values.add("moderator");

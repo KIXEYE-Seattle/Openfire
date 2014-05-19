@@ -894,6 +894,20 @@ public interface MUCRoom extends Externalizable, Result {
     public void setPublicRoom(boolean publicRoom);
 
     /**
+     * Returns true if the room does not send initial presence information on join.
+     *
+     * @return true if the room does not send initial presence information on join.
+     */
+    public boolean blockInitialPresence();
+
+    /**
+     * Sets if the room blocks initial presence information on join.
+     *
+     * @param block if the room blocks the initial presence information on join.
+     */
+    public void setBlockInitialPresence(boolean block);
+
+    /**
      * Returns the list of roles of which presence will be broadcasted to the rest of the occupants.
      * This feature is useful for implementing "invisible" occupants.
      * 

@@ -436,6 +436,13 @@ public class IQOwnerHandler {
             room.setMaxUsers((value != null ? Integer.parseInt(value) : 30));
         }
 
+        field = completedForm.getField("muc#roomconfig_blockinitialpresence");
+        if (field != null) {
+            final String value = field.getFirstValue();
+            booleanValue = ((value != null ? value : "0"));
+            room.setBlockInitialPresence(("1".equals(booleanValue)));
+        }
+
         field = completedForm.getField("muc#roomconfig_presencebroadcast");
         if (field != null) {
             values = new ArrayList<String>(field.getValues());
@@ -601,6 +608,10 @@ public class IQOwnerHandler {
             field.clearValues();
             field.addValue(Integer.toString(room.getMaxUsers()));
 
+            field = configurationForm.getField("muc#roomconfig_blockinitialpresence");
+            field.clearValues();
+            field.addValue((room.blockInitialPresence() ? "1" : "0"));
+
             field = configurationForm.getField("muc#roomconfig_presencebroadcast");
             field.clearValues();
             for (String roleToBroadcast : room.getRolesToBroadcastPresence()) {
@@ -713,6 +724,10 @@ public class IQOwnerHandler {
         maxUsers.addOption("40", "40");
         maxUsers.addOption("50", "50");
         maxUsers.addOption(LocaleUtils.getLocalizedString("muc.form.conf.none"), "0");
+
+        configurationForm.addField("muc#roomconfig_blockinitialpresence",
+                LocaleUtils.getLocalizedString("muc.form.conf.owner_blockinitialpresence"),
+                Type.boolean_type);
 
         final FormField broadcast = configurationForm.addField(
         		"muc#roomconfig_presencebroadcast",

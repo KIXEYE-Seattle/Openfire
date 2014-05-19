@@ -218,6 +218,13 @@ public class LocalMUCRoom implements MUCRoom {
     private List<String> rolesToBroadcastPresence = new ArrayList<String>();
 
     /**
+     * Blocking initial presence means that a user joining a room does not get presence
+     * information for the existing members.  Also, existing members are not notified of
+     * new user joining the room.  This is a more granular switch than doing it per role.
+     */
+    private boolean blockInitialPresence;
+
+    /**
      * A public room means that the room is searchable and visible. This means that the room can be
      * located using disco requests.
      */
@@ -701,6 +708,9 @@ public class LocalMUCRoom implements MUCRoom {
      * @param joinRole the role of the new occupant in the room.
      */
     private void sendInitialPresences(LocalMUCRole joinRole) {
+        if (blockInitialPresence) {
+            return;
+        }
         for (MUCRole occupant : occupantsByFullJID.values()) {
             if (occupant == joinRole) {
                 continue;
@@ -1041,7 +1051,7 @@ public class LocalMUCRoom implements MUCRoom {
      * @return true if the presence should be broadcast to the rest of the room
      */
     private boolean shouldBroadcastPresence(Presence presence){
-        if (presence == null) {
+        if (presence == null || blockInitialPresence()) {
             return false;
         }
         if (hasToCheckRoleToBroadcastPresence()) {
@@ -2257,6 +2267,14 @@ public class LocalMUCRoom implements MUCRoom {
 
     public void setPublicRoom(boolean publicRoom) {
         this.publicRoom = publicRoom;
+    }
+
+    public boolean blockInitialPresence() {
+        return blockInitialPresence;
+    }
+
+    public void setBlockInitialPresence(boolean block) {
+        this.blockInitialPresence = block;
     }
 
     public List<String> getRolesToBroadcastPresence() {

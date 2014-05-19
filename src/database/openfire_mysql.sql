@@ -204,6 +204,7 @@ CREATE TABLE ofMucRoom (
   useReservedNick     TINYINT       NOT NULL,
   canChangeNick       TINYINT       NOT NULL,
   canRegister         TINYINT       NOT NULL,
+  blockInitialPresence TINYINT      NOT NULL,
   PRIMARY KEY (serviceID,name),
   INDEX ofMucRoom_roomid_idx (roomID),
   INDEX ofMucRoom_serviceid_idx (serviceID)
