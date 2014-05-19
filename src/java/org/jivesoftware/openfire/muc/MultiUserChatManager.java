@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
 
 import org.jivesoftware.database.DbConnectionManager;
 import org.jivesoftware.database.SequenceManager;
@@ -55,6 +56,7 @@ import org.jivesoftware.util.AlreadyExistsException;
 import org.jivesoftware.util.JiveConstants;
 import org.jivesoftware.util.LocaleUtils;
 import org.jivesoftware.util.NotFoundException;
+import org.jivesoftware.util.cache.Cache;
 import org.jivesoftware.util.cache.CacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +71,8 @@ import org.xmpp.packet.JID;
  */
 public class MultiUserChatManager extends BasicModule implements ClusterEventListener, MUCServicePropertyEventListener,
         UserEventListener {
+
+    public static final String MUC_CACHE_NAME = "MucManagerCache";
 
 	private static final Logger Log = LoggerFactory.getLogger(MultiUserChatManager.class);
 
@@ -90,6 +94,8 @@ public class MultiUserChatManager extends BasicModule implements ClusterEventLis
     private static final String trafficStatGroup = "muc_traffic";
 
     private ConcurrentHashMap<String,MultiUserChatService> mucServices = new ConcurrentHashMap<String,MultiUserChatService>();
+
+    private Cache<String,Boolean> serviceCreateLockCache;
 
     /**
      * Creates a new MultiUserChatManager instance.
@@ -120,6 +126,8 @@ public class MultiUserChatManager extends BasicModule implements ClusterEventLis
 
         ClusterManager.addListener(this);
         UserEventDispatcher.addListener(this);
+
+        serviceCreateLockCache = CacheFactory.createCache(MUC_CACHE_NAME);
     }
 
     /**
@@ -215,11 +223,17 @@ public class MultiUserChatManager extends BasicModule implements ClusterEventLis
      * @throws AlreadyExistsException if the service already exists.
      */
     public MultiUserChatServiceImpl createMultiUserChatService(String subdomain, String description, Boolean isHidden) throws AlreadyExistsException {
-        if (getMultiUserChatServiceID(subdomain) != null) throw new AlreadyExistsException();
-        MultiUserChatServiceImpl muc = new MultiUserChatServiceImpl(subdomain, description, isHidden);
-        insertService(subdomain, description, isHidden);
-        registerMultiUserChatService(muc);
-        return muc;
+        Lock lock = CacheFactory.getLock(subdomain, serviceCreateLockCache);
+        try {
+            lock.lock();
+            if (getMultiUserChatServiceID(subdomain) != null) throw new AlreadyExistsException();
+            MultiUserChatServiceImpl muc = new MultiUserChatServiceImpl(subdomain, description, isHidden);
+            insertService(subdomain, description, isHidden);
+            registerMultiUserChatService(muc);
+            return muc;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

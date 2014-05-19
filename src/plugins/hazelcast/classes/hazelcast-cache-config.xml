@@ -180,7 +180,11 @@
     </map>
     
     <!--  Partitioned Openfire caches without size/time limits (no eviction). -->
-    
+
+    <map name="MucManagerCache">
+        <backup-count>1</backup-count>
+        <read-backup-data>true</read-backup-data>
+    </map>
     <map name="opt-$cacheStats">
         <backup-count>1</backup-count>
         <read-backup-data>true</read-backup-data>
