@@ -239,6 +239,11 @@ public class PresenceManagerImpl extends BasicModule implements PresenceManager,
     }
 
     public void userUnavailable(Presence presence) {
+        // early out if offline presence is disabled
+        if (isOfflinePresenceDisabled()) {
+            return;
+        }
+
         // Only save the last presence status and keep track of the time when the user went
         // offline if this is an unavailable presence sent to THE SERVER and the presence belongs
         // to a local user.
