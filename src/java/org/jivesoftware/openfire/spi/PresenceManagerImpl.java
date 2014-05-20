@@ -48,6 +48,7 @@ import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
+import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.LocaleUtils;
 import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.util.cache.Cache;
@@ -211,7 +212,16 @@ public class PresenceManagerImpl extends BasicModule implements PresenceManager,
         }
     }
 
+    private boolean isOfflinePresenceDisabled() {
+        return JiveGlobals.getBooleanProperty("presence.offline.disable",false);
+    }
+
     private void deleteOfflinePresenceFromDB(String username) {
+        // early out if offline presence is disabled
+        if (isOfflinePresenceDisabled()) {
+            return;
+        }
+
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -270,6 +280,11 @@ public class PresenceManagerImpl extends BasicModule implements PresenceManager,
     }
 
     private void writeToDatabase(String username, String offlinePresence, Date offlinePresenceDate) {
+        // early out if offline presence is disabled
+        if (isOfflinePresenceDisabled()) {
+            return;
+        }
+
         // delete existing offline presence (if any)
         deleteOfflinePresenceFromDB(username);
 
@@ -541,6 +556,11 @@ public class PresenceManagerImpl extends BasicModule implements PresenceManager,
      * @param username the username.
      */
     private void loadOfflinePresence(String username) {
+        // early out if offline presence has been disabled
+        if (isOfflinePresenceDisabled()) {
+            return;
+        }
+
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
