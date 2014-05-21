@@ -581,7 +581,7 @@ public class CacheFactory {
      * @param task the task to be invoked on all other cluster members.
      */
     public static void doClusterTask(final ClusterTask task) {
-        incrementTaskCounter(task.getClass(), getClusterNodesInfo().size() - 1);
+        incrementTaskCounter(task.getClass(), getClusterNodesInfo().size());
         cacheFactoryStrategy.doClusterTask(task);
     }
 
@@ -609,7 +609,7 @@ public class CacheFactory {
      * @return collection with the result of the execution.
      */
     public static Collection<Object> doSynchronousClusterTask(ClusterTask task, boolean includeLocalMember) {
-        incrementTaskCounter(task.getClass(),getClusterNodesInfo().size() - 1);
+        incrementTaskCounter(task.getClass(),getClusterNodesInfo().size());
         return cacheFactoryStrategy.doSynchronousClusterTask(task, includeLocalMember);
     }
 
