@@ -562,6 +562,12 @@ public class CacheFactory {
      * @param clazz class of the task to increment
      */
     private static void incrementTaskCounter(Class<?> clazz,long delta) {
+        // clamp delta to at least 1
+        if (delta <= 0) {
+            delta = 1;
+        }
+
+        // ensure we have an AtomicLong for this class
         AtomicLong counter = taskCounters.get(clazz);
         if (counter == null) {
             counter = new AtomicLong(0);
@@ -570,6 +576,8 @@ public class CacheFactory {
                 counter = old;
             }
         }
+
+        // update counter
         counter.addAndGet(delta);
     }
     
