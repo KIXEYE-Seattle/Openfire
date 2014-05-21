@@ -20,13 +20,9 @@
 package org.jivesoftware.util.cache;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 
 import org.jivesoftware.openfire.XMPPServer;
@@ -89,6 +85,9 @@ public class CacheFactory {
      * by setting the corresponding system properties.
      */
     private static final Map<String, Long> cacheProps = new HashMap<String, Long>();
+
+
+    private static ConcurrentHashMap<Class<?>,AtomicLong> taskCounters = new ConcurrentHashMap<Class<?>, AtomicLong>();
 
     static {
         localCacheFactoryClass = JiveGlobals.getProperty(LOCAL_CACHE_PROPERTY_NAME,
@@ -548,6 +547,31 @@ public class CacheFactory {
     		return localCacheFactoryStrategy.getClusterTime();
     	}
     }
+
+
+    /**
+     * Get set of task classes and their counters.
+     * @return set of task classes and their counters.
+     */
+    public static Set<Map.Entry<Class<?>,AtomicLong>> getTaskCounters() {
+        return taskCounters.entrySet();
+    }
+
+    /**
+     * Increment counter the task's class.
+     * @param clazz class of the task to increment
+     */
+    private static void incrementTaskCounter(Class<?> clazz) {
+        AtomicLong counter = taskCounters.get(clazz);
+        if (counter == null) {
+            counter = new AtomicLong(0);
+            AtomicLong old = taskCounters.putIfAbsent(clazz, counter);
+            if (old != null) {
+                counter = old;
+            }
+        }
+        counter.incrementAndGet();
+    }
     
     /**
      * Invokes a task on other cluster members in an asynchronous fashion. The task will not be
@@ -557,6 +581,7 @@ public class CacheFactory {
      * @param task the task to be invoked on all other cluster members.
      */
     public static void doClusterTask(final ClusterTask task) {
+        incrementTaskCounter(task.getClass());
         cacheFactoryStrategy.doClusterTask(task);
     }
 
@@ -569,6 +594,7 @@ public class CacheFactory {
      * @throws IllegalStateException if requested node was not found or not running in a cluster. 
      */
     public static void doClusterTask(final ClusterTask task, byte[] nodeID) {
+        incrementTaskCounter(task.getClass());
         cacheFactoryStrategy.doClusterTask(task, nodeID);
     }
 
@@ -583,6 +609,7 @@ public class CacheFactory {
      * @return collection with the result of the execution.
      */
     public static Collection<Object> doSynchronousClusterTask(ClusterTask task, boolean includeLocalMember) {
+        incrementTaskCounter(task.getClass());
         return cacheFactoryStrategy.doSynchronousClusterTask(task, includeLocalMember);
     }
 
@@ -596,6 +623,7 @@ public class CacheFactory {
      * @throws IllegalStateException if requested node was not found or not running in a cluster.
      */
     public static Object doSynchronousClusterTask(ClusterTask task, byte[] nodeID) {
+        incrementTaskCounter(task.getClass());
         return cacheFactoryStrategy.doSynchronousClusterTask(task, nodeID);
     }
     
