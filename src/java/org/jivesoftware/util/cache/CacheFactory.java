@@ -561,7 +561,7 @@ public class CacheFactory {
      * Increment counter the task's class.
      * @param clazz class of the task to increment
      */
-    private static void incrementTaskCounter(Class<?> clazz) {
+    private static void incrementTaskCounter(Class<?> clazz,long delta) {
         AtomicLong counter = taskCounters.get(clazz);
         if (counter == null) {
             counter = new AtomicLong(0);
@@ -570,7 +570,7 @@ public class CacheFactory {
                 counter = old;
             }
         }
-        counter.incrementAndGet();
+        counter.addAndGet(delta);
     }
     
     /**
@@ -581,7 +581,7 @@ public class CacheFactory {
      * @param task the task to be invoked on all other cluster members.
      */
     public static void doClusterTask(final ClusterTask task) {
-        incrementTaskCounter(task.getClass());
+        incrementTaskCounter(task.getClass(), getClusterNodesInfo().size() - 1);
         cacheFactoryStrategy.doClusterTask(task);
     }
 
@@ -594,7 +594,7 @@ public class CacheFactory {
      * @throws IllegalStateException if requested node was not found or not running in a cluster. 
      */
     public static void doClusterTask(final ClusterTask task, byte[] nodeID) {
-        incrementTaskCounter(task.getClass());
+        incrementTaskCounter(task.getClass(), 1);
         cacheFactoryStrategy.doClusterTask(task, nodeID);
     }
 
@@ -609,7 +609,7 @@ public class CacheFactory {
      * @return collection with the result of the execution.
      */
     public static Collection<Object> doSynchronousClusterTask(ClusterTask task, boolean includeLocalMember) {
-        incrementTaskCounter(task.getClass());
+        incrementTaskCounter(task.getClass(),getClusterNodesInfo().size() - 1);
         return cacheFactoryStrategy.doSynchronousClusterTask(task, includeLocalMember);
     }
 
@@ -623,7 +623,7 @@ public class CacheFactory {
      * @throws IllegalStateException if requested node was not found or not running in a cluster.
      */
     public static Object doSynchronousClusterTask(ClusterTask task, byte[] nodeID) {
-        incrementTaskCounter(task.getClass());
+        incrementTaskCounter(task.getClass(),1);
         return cacheFactoryStrategy.doSynchronousClusterTask(task, nodeID);
     }
     
