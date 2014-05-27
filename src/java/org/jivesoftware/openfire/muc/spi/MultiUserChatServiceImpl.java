@@ -449,17 +449,7 @@ public class MultiUserChatServiceImpl implements Component, MultiUserChatService
     }
 
     private void logConversation() {
-        ConversationLogEntry entry;
-        boolean success;
-        for (int index = 0; index <= log_batch_size && !logQueue.isEmpty(); index++) {
-            entry = logQueue.poll();
-            if (entry != null) {
-                success = MUCPersistenceManager.saveConversationLogEntry(entry);
-                if (!success) {
-                    logQueue.add(entry);
-                }
-            }
-        }
+        MUCPersistenceManager.saveConversationLogQueue(logQueue,log_batch_size);
     }
 
     /**
@@ -467,13 +457,7 @@ public class MultiUserChatServiceImpl implements Component, MultiUserChatService
      * saving all the conversation log entries before the service becomes unavailable.
      */
     private void logAllConversation() {
-        ConversationLogEntry entry;
-        while (!logQueue.isEmpty()) {
-            entry = logQueue.poll();
-            if (entry != null) {
-                MUCPersistenceManager.saveConversationLogEntry(entry);
-            }
-        }
+        MUCPersistenceManager.saveConversationLogQueue(logQueue,logQueue.size());
     }
 
     /**
