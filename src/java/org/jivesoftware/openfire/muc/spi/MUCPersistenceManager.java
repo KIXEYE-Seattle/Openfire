@@ -1061,7 +1061,7 @@ public class MUCPersistenceManager {
         try {
             con = DbConnectionManager.getConnection();
             pstmt = con.prepareStatement(ADD_CONVERSATION_LOG);
-            pstmt.setLong(1, entry.getRoomID());
+            pstmt.setLong  (1, entry.getRoomID());
             pstmt.setString(2, entry.getSender().toString());
             pstmt.setString(3, entry.getNickname());
             pstmt.setString(4, StringUtils.dateToMillis(entry.getDate()));
@@ -1087,6 +1087,11 @@ public class MUCPersistenceManager {
      */
     public static void saveConversationLogQueue(Queue<ConversationLogEntry> entryQueue, int maxEntriesToWrite) {
 
+        // early out if nothing to persist
+        if (entryQueue.isEmpty()) {
+            return;
+        }
+
         // if JDBC drvier does not support batching, revert to one at a time
         if (!supportsBatchUpdates()) {
             while (maxEntriesToWrite > 0 && !entryQueue.isEmpty()) {
@@ -1103,59 +1108,33 @@ public class MUCPersistenceManager {
             return;
         }
 
-        // batching supported, fold the inserts into one statement
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        boolean originalAutoCommit = true;
-        try {
-            con = DbConnectionManager.getConnection();
-
-            // prepare for batch operation
-            originalAutoCommit = con.getAutoCommit();
-            con.setAutoCommit(false);
-
-            // batch inserts into single call
-            while (maxEntriesToWrite > 0 && !entryQueue.isEmpty()) {
-                // limit batch to N inserts per submit
+        // batching supported, group inserts into batches of 25
+        while (maxEntriesToWrite > 0 && !entryQueue.isEmpty()) {
+            Connection con = null;
+            PreparedStatement pstmt = null;
+            try {
+                con = DbConnectionManager.getConnection();
                 pstmt = con.prepareStatement(ADD_CONVERSATION_LOG);
                 for ( int i = 0; (i < 25) && (maxEntriesToWrite > 0) && !entryQueue.isEmpty(); i++ ) {
                     ConversationLogEntry entry = entryQueue.poll();
                     if (entry == null) {
                         continue;
                     }
-                    pstmt.setLong(1, entry.getRoomID());
+                    pstmt.setLong  (1, entry.getRoomID());
                     pstmt.setString(2, entry.getSender().toString());
                     pstmt.setString(3, entry.getNickname());
                     pstmt.setString(4, StringUtils.dateToMillis(entry.getDate()));
                     pstmt.setString(5, entry.getSubject());
                     pstmt.setString(6, entry.getBody());
                     pstmt.addBatch();
-
                     maxEntriesToWrite -= 1;
                 }
                 pstmt.executeBatch();
-                con.commit();
-                pstmt.close();
-                pstmt = null;
+            } catch (Exception e) {
+                Log.error("Error saving conversation log entry", e);
+            } finally {
+                DbConnectionManager.closeConnection(pstmt, con);
             }
-        }
-        catch (SQLException sqle) {
-            Log.error("Error saving conversation log entry", sqle);
-            try {
-                // clear the failed operation
-                con.rollback();
-            } catch (SQLException e) {
-                Log.error("Error rolling back save", e);
-            }
-        }
-        finally {
-            try {
-                // restore connection state
-                con.setAutoCommit(originalAutoCommit);
-            } catch (SQLException e) {
-                Log.error("Error restoring auto commit value", e);
-            }
-            DbConnectionManager.closeConnection(pstmt, con);
         }
     }
 
