@@ -153,7 +153,8 @@ public class MUCPersistenceManager {
             initializedSupportsBatchUpdates = true;
         } catch (SQLException e) {
             Log.error("Unexpected exception checking for batch capability", e);
-            return false;
+            supportsBatchUpdates = false;
+            initializedSupportsBatchUpdates = true;
         } finally {
             DbConnectionManager.closeConnection(con);
         }
