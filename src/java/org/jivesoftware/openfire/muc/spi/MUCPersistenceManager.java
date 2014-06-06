@@ -1093,7 +1093,7 @@ public class MUCPersistenceManager {
             return;
         }
 
-        // if JDBC drvier does not support batching, revert to one at a time
+        // if JDBC driver does not support batching, revert to one at a time
         if (!supportsBatchUpdates()) {
             while (maxEntriesToWrite > 0 && !entryQueue.isEmpty()) {
                 ConversationLogEntry entry = entryQueue.poll();
