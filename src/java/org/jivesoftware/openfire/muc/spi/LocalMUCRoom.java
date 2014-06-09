@@ -708,8 +708,10 @@ public class LocalMUCRoom implements MUCRoom {
      * @param joinRole the role of the new occupant in the room.
      */
     private void sendInitialPresences(LocalMUCRole joinRole) {
-        if (blockInitialPresence) {
+        if (blockInitialPresence()) {
             return;
+        } else {
+            Log.warn("Room " + getName() + "is sending initial presence");
         }
         for (MUCRole occupant : occupantsByFullJID.values()) {
             if (occupant == joinRole) {
@@ -1051,8 +1053,13 @@ public class LocalMUCRoom implements MUCRoom {
      * @return true if the presence should be broadcast to the rest of the room
      */
     private boolean shouldBroadcastPresence(Presence presence){
-        if (presence == null || blockInitialPresence()) {
+        if (presence == null) {
             return false;
+        }
+        if (blockInitialPresence()) {
+            return false;
+        } else {
+            Log.warn("Room " + getName() + "is broadcasting presence");
         }
         if (hasToCheckRoleToBroadcastPresence()) {
             Element frag = presence.getChildElement("x", "http://jabber.org/protocol/muc#user");
