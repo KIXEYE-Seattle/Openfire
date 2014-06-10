@@ -60,7 +60,8 @@ public class DefaultLocalCacheStrategy implements CacheFactoryStrategy {
         long maxSize = CacheFactory.getMaxCacheSize(name);
         long lifetime = CacheFactory.getMaxCacheLifetime(name);
         // Create cache with located properties
-        return new DefaultCache(name, maxSize, lifetime);
+        //return new DefaultCache(name, maxSize, lifetime);
+        return new GuavaCache(name,maxSize,lifetime);
     }
 
     public void destroyCache(Cache cache) {
