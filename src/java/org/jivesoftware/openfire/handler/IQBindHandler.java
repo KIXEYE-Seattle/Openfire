@@ -69,10 +69,7 @@ public class IQBindHandler extends IQHandler {
         LocalClientSession session = (LocalClientSession) sessionManager.getSession(packet.getFrom());
         // If no session was found then answer an error (if possible)
         if (session == null) {
-            Log.error("Error during resource binding. Session not found in " +
-                    sessionManager.getPreAuthenticatedKeys() +
-                    " for key " +
-                    packet.getFrom());
+            Log.error("Error during resource binding. Session not found for key " + packet.getFrom());
             // This error packet will probably won't make it through
             IQ reply = IQ.createResultIQ(packet);
             reply.setChildElement(packet.getChildElement().createCopy());
