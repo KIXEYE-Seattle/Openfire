@@ -623,7 +623,7 @@ public class LocalMUCRoom implements MUCRoom {
             // Add the new user as an occupant of this room
             List<MUCRole> occupants = occupantsByNickname.get(nickname.toLowerCase());
             if (occupants == null) {
-            	occupants = new ArrayList<MUCRole>();
+            	occupants = new CopyOnWriteArrayList<MUCRole>();
             	occupantsByNickname.put(nickname.toLowerCase(), occupants);
             }
             occupants.add(joinRole);
@@ -747,7 +747,7 @@ public class LocalMUCRoom implements MUCRoom {
         List<MUCRole> occupants = occupantsByNickname.get(nickname.toLowerCase());
         // Do not add new occupant with one with same nickname already exists
         if (occupants == null) {
-            occupants = new ArrayList<MUCRole>();
+            occupants = new CopyOnWriteArrayList<MUCRole>();
             occupantsByNickname.put(nickname.toLowerCase(), occupants);
         } else {
         	// sanity check; make sure the nickname is owned by the same JID
@@ -2105,7 +2105,7 @@ public class LocalMUCRoom implements MUCRoom {
      */
     private void kickPresence(Presence kickPresence, JID actorJID) {
         // Get the role(s) to kick
-        List<MUCRole> occupants = new ArrayList<MUCRole>(occupantsByNickname.get(kickPresence.getFrom().getResource().toLowerCase()));
+        List<MUCRole> occupants = occupantsByNickname.get(kickPresence.getFrom().getResource().toLowerCase());
         for (MUCRole kickedRole : occupants) {
             kickPresence = kickPresence.createCopy();
             // Add the actor's JID that kicked this user from the room
