@@ -281,6 +281,7 @@ public class ClusterManager {
      */
     public static synchronized void startup() {
         if (isClusteringEnabled() && !isClusteringStarted()) {
+            Log.info("Hazelcast clustering is starting!");
             initEventDispatcher();
             CacheFactory.startClustering();
         }

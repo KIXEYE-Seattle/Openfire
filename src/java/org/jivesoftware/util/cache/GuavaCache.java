@@ -2,13 +2,30 @@ package org.jivesoftware.util.cache;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import org.jivesoftware.util.TaskEngine;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.TimerTask;
+import java.util.concurrent.*;
 
 public class GuavaCache<K, V> implements Cache<K, V> {
+
+    static private final LinkedBlockingQueue<com.google.common.cache.Cache<?,?>> caches;
+
+    static {
+        // manually clean up caches to reduce memory footprint
+        caches = new LinkedBlockingQueue<com.google.common.cache.Cache<?,?>>();
+        TaskEngine.getInstance().schedule( new TimerTask() {
+            @Override
+            public void run() {
+                for (com.google.common.cache.Cache<?,?> c : caches) {
+                    c.cleanUp();
+                }
+            }
+        }, 5000, 10000);
+    }
 
     /**
      * The map the keys and values are stored in.
@@ -46,8 +63,11 @@ public class GuavaCache<K, V> implements Cache<K, V> {
         if (maxLifetime >= 0) {
             builder.expireAfterAccess(maxLifetime, TimeUnit.MILLISECONDS);
         }
+        builder.recordStats();
         map = builder.build();
 
+        // save cache reference for clean up
+        caches.offer(map);
     }
 
     @Override
@@ -74,7 +94,6 @@ public class GuavaCache<K, V> implements Cache<K, V> {
     @Override
     public long getMaxLifetime() {
         return maxLifetime;
-
     }
 
     @Override
