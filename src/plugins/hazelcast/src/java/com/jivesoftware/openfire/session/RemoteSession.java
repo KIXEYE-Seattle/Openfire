@@ -61,6 +61,10 @@ public abstract class RemoteSession implements Session {
         return address;
     }
 
+    public byte[] getNodeID() {
+        return nodeID;
+    }
+
     /**
      * Remote sessions are always authenticated. Otherwise, they won't be visibile to other
      * cluster nodes. When the session is closed it will no longer be visible to other nodes
@@ -168,7 +172,7 @@ public abstract class RemoteSession implements Session {
      * @param task        the ClusterTask object to be invoked on a given cluster member.
      * @return result of remote operation.
      */
-    protected Object doSynchronousClusterTask(ClusterTask task) {
+    public Object doSynchronousClusterTask(ClusterTask task) {
     	ClusterNodeInfo info = CacheFactory.getClusterNodeInfo(nodeID);
     	Object result = null;
     	if (info == null && task instanceof RemoteSessionTask) { // clean up invalid session
@@ -185,7 +189,7 @@ public abstract class RemoteSession implements Session {
      *
      * @param task the task to be invoked on the specified cluster member.
      */
-    protected void doClusterTask(ClusterTask task) {
+    public void doClusterTask(ClusterTask task) {
     	ClusterNodeInfo info = CacheFactory.getClusterNodeInfo(nodeID);
     	if (info == null && task instanceof RemoteSessionTask) { // clean up invalid session
         	SessionManager.getInstance().removeSession(null, 
