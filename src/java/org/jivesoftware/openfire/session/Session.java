@@ -22,6 +22,7 @@ package org.jivesoftware.openfire.session;
 
 import org.jivesoftware.openfire.RoutableChannelHandler;
 import org.jivesoftware.openfire.StreamID;
+import org.jivesoftware.util.cache.ClusterTask;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
 
@@ -195,4 +196,18 @@ public interface Session extends RoutableChannelHandler {
      * @return true if the socket remains valid, false otherwise.
      */
     public boolean validate();
+
+    /**
+     * Execute cluster task on owner of this session.
+     * @param task
+     * @return
+     */
+    public Object doSynchronousClusterTask(ClusterTask task);
+
+    /**
+     * Execute cluster task on owner of this session.
+     * @param task
+     * @return
+     */
+    public void doClusterTask(ClusterTask task);
 }

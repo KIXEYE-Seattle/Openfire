@@ -30,6 +30,7 @@ import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.interceptor.PacketRejectedException;
 import org.jivesoftware.openfire.spi.RoutingTableImpl;
 import org.jivesoftware.util.LocaleUtils;
+import org.jivesoftware.util.cache.ClusterTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.*;
@@ -386,5 +387,17 @@ public abstract class LocalSession implements Session {
      */
     public boolean isUsingSelfSignedCertificate() {
         return conn.isUsingSelfSignedCertificate();
+    }
+
+
+    @Override
+    public Object doSynchronousClusterTask(ClusterTask task) {
+        task.run();
+        return task.getResult();
+    }
+
+    @Override
+    public void doClusterTask(ClusterTask task) {
+        task.run();
     }
 }
