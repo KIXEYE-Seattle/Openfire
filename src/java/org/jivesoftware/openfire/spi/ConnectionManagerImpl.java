@@ -840,7 +840,7 @@ public class ConnectionManagerImpl extends BasicModule implements ConnectionMana
 
         // Set default (low level) settings for new socket connections
         SocketSessionConfig socketSessionConfig = socketAcceptorConfig.getSessionConfig();
-        //socketSessionConfig.setKeepAlive();
+        socketSessionConfig.setKeepAlive(true);
         int receiveBuffer = JiveGlobals.getIntProperty("xmpp.socket.buffer.receive", -1);
         if (receiveBuffer > 0 ) {
             socketSessionConfig.setReceiveBufferSize(receiveBuffer);

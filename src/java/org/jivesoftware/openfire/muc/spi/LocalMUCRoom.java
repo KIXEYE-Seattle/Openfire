@@ -1509,6 +1509,10 @@ public class LocalMUCRoom implements MUCRoom {
                     throw new ForbiddenException();
                 }
             }
+            // DEBUG check to make sure tables are getting cleaned up
+            if (members.size() > 1000) {
+                Log.error("Room " + getName() + " has too many members " + members.size() );
+            }
             // Check if the desired nickname is already reserved for another member
             if (nickname != null && nickname.trim().length() > 0 && members.containsValue(nickname.toLowerCase())) {
                 if (!nickname.equals(members.get(bareJID))) {
