@@ -201,7 +201,36 @@ public class MUCPersistenceManager {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+
         try {
+            // Load chat history from database
+
+            // calculate time frame
+            long from = 0;
+            String reloadLimit = JiveGlobals.getProperty(MUC_HISTORY_RELOAD_LIMIT);
+            if (reloadLimit != null) {
+                int reloadLimitDays = JiveGlobals.getIntProperty(MUC_HISTORY_RELOAD_LIMIT, 2);
+                Log.warn("MUC history reload limit set to " + reloadLimitDays + " days");
+                from = System.currentTimeMillis() - (86400000 * reloadLimitDays);
+            }
+
+            // get logs from ofChatLog (KIXEYE CHAT Addition)
+            con = DbConnectionManager.getConnection();
+            pstmt = con.prepareStatement("SELECT sender, senderNick, logTime, body FROM ofChatLog WHERE destination=? AND logTime>? ORDER BY logTime");
+            pstmt.setString(1, room.getJID().toBareJID() );
+            pstmt.setLong(2, from);
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String senderJID = rs.getString(1);
+                String nickname = rs.getString(2);
+                Date sentDate = new Date(rs.getLong(3));
+                String body = rs.getString(4);
+                if (nickname != null) {
+                    room.getRoomHistory().addOldMessage(senderJID, nickname, sentDate, "", body);
+                }
+            }
+
+            /*
             Long serviceID = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServiceID(room.getMUCService().getServiceName());
             con = DbConnectionManager.getConnection();
             pstmt = con.prepareStatement(LOAD_ROOM);
@@ -337,6 +366,7 @@ public class MUCPersistenceManager {
                 // the last occupant left the room that we can
                 room.setEmptyDate(new Date());
             }
+            */
         }
         catch (SQLException sqle) {
             Log.error(sqle.getMessage(), sqle);
