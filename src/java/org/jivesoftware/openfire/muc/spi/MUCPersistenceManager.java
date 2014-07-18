@@ -142,6 +142,8 @@ public class MUCPersistenceManager {
      * @return true of JDBC batching is supported, false otherwise.
      */
     public static boolean supportsBatchUpdates() {
+        return true;
+        /*
         if (initializedSupportsBatchUpdates) {
             return supportsBatchUpdates;
         }
@@ -159,6 +161,7 @@ public class MUCPersistenceManager {
             DbConnectionManager.closeConnection(con);
         }
         return supportsBatchUpdates;
+        */
     }
 
     /**
@@ -169,6 +172,8 @@ public class MUCPersistenceManager {
      * @return the reserved room nickname for the bare JID or null if none.
      */
     public static String getReservedNickname(MUCRoom room, String bareJID) {
+        return null;
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -190,6 +195,7 @@ public class MUCPersistenceManager {
             DbConnectionManager.closeConnection(rs, pstmt, con);
         }
         return answer;
+        */
     }
 
     /**
@@ -382,6 +388,7 @@ public class MUCPersistenceManager {
      * @param room The room to save its configuration.
      */
     public static void saveToDB(LocalMUCRoom room) {
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -449,6 +456,7 @@ public class MUCPersistenceManager {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     /**
@@ -457,6 +465,7 @@ public class MUCPersistenceManager {
      * @param room the room to remove from the database.
      */
     public static void deleteFromDB(MUCRoom room) {
+        /*
         if (!room.isPersistent() || !room.wasSavedToDB()) {
             return;
         }
@@ -490,6 +499,7 @@ public class MUCPersistenceManager {
             DbConnectionManager.closeStatement(pstmt);
             DbConnectionManager.closeTransactionConnection(con, abortTransaction);
         }
+        */
     }
 
     /**
@@ -502,6 +512,8 @@ public class MUCPersistenceManager {
      * @return a collection with all the persistent rooms.
      */
     public static Collection<LocalMUCRoom> loadRoomsFromDB(MultiUserChatService chatserver, Date emptyDate, PacketRouter packetRouter) {
+        return Collections.emptyList();
+        /*
         Long serviceID = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServiceID(chatserver.getServiceName());
 
         final Map<Long, LocalMUCRoom> rooms;
@@ -530,11 +542,13 @@ public class MUCPersistenceManager {
         }
 
         return rooms.values();
+        */
     }
 
     private static Map<Long, LocalMUCRoom> loadRooms(Long serviceID, Date emptyDate, MultiUserChatService chatserver, PacketRouter packetRouter) throws SQLException {
         final Map<Long, LocalMUCRoom> rooms = new HashMap<Long, LocalMUCRoom>();
 
+        /*
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -595,11 +609,13 @@ public class MUCPersistenceManager {
         } finally {
             DbConnectionManager.closeConnection(resultSet, statement, connection);
         }
+        */
 
         return rooms;
     }
 
     private static void loadHistory(Long serviceID, Map<Long, LocalMUCRoom> rooms) throws SQLException {
+        /*
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -656,9 +672,11 @@ public class MUCPersistenceManager {
                                                             null);
             }
         }
+        */
     }
 
     private static void loadAffiliations(Long serviceID, Map<Long, LocalMUCRoom> rooms) throws SQLException {
+        /*
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -720,9 +738,11 @@ public class MUCPersistenceManager {
         } finally {
             DbConnectionManager.closeConnection(resultSet, statement, connection);
         }
+        */
     }
 
     private static void loadMembers(Long serviceID, Map<Long, LocalMUCRoom> rooms) throws SQLException {
+        /*
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -753,6 +773,7 @@ public class MUCPersistenceManager {
         } finally {
             DbConnectionManager.closeConnection(resultSet, statement, connection);
         }
+        */
     }
 
     /**
@@ -761,6 +782,7 @@ public class MUCPersistenceManager {
      * @param room the room to update its subject in the database.
      */
     public static void updateRoomSubject(MUCRoom room) {
+        /*
         if (!room.isPersistent() || !room.wasSavedToDB()) {
             return;
         }
@@ -780,6 +802,7 @@ public class MUCPersistenceManager {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     /**
@@ -788,6 +811,7 @@ public class MUCPersistenceManager {
      * @param room the room to update its lock status in the database.
      */
     public static void updateRoomLock(LocalMUCRoom room) {
+        /*
         if (!room.isPersistent() || !room.wasSavedToDB()) {
             return;
         }
@@ -807,6 +831,7 @@ public class MUCPersistenceManager {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     /**
@@ -815,6 +840,7 @@ public class MUCPersistenceManager {
      * @param room the room to update its lock status in the database.
      */
     public static void updateRoomEmptyDate(MUCRoom room) {
+        /*
         if (!room.isPersistent() || !room.wasSavedToDB()) {
             return;
         }
@@ -840,6 +866,7 @@ public class MUCPersistenceManager {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     /**
@@ -855,6 +882,7 @@ public class MUCPersistenceManager {
     public static void saveAffiliationToDB(MUCRoom room, JID jid, String nickname,
             MUCRole.Affiliation newAffiliation, MUCRole.Affiliation oldAffiliation)
     {
+        /*
     	final String bareJID = jid.toBareJID();
         if (!room.isPersistent() || !room.wasSavedToDB()) {
             return;
@@ -997,6 +1025,7 @@ public class MUCPersistenceManager {
                 }
             }
         }
+        */
     }
 
     /**
@@ -1009,6 +1038,7 @@ public class MUCPersistenceManager {
     public static void removeAffiliationFromDB(MUCRoom room, JID jid,
             MUCRole.Affiliation oldAffiliation)
     {
+        /*
     	final String bareJID = jid.toBareJID();
         if (room.isPersistent() && room.wasSavedToDB()) {
             if (MUCRole.Affiliation.member == oldAffiliation) {
@@ -1048,6 +1078,7 @@ public class MUCPersistenceManager {
                 }
             }
         }
+        */
     }
 
     /**
@@ -1057,6 +1088,7 @@ public class MUCPersistenceManager {
      */
     public static void removeAffiliationFromDB(JID bareJID)
     {
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -1078,6 +1110,7 @@ public class MUCPersistenceManager {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     /**
@@ -1087,6 +1120,8 @@ public class MUCPersistenceManager {
      * @return true if the ConversationLogEntry was saved successfully to the database.
      */
     public static boolean saveConversationLogEntry(ConversationLogEntry entry) {
+        return true;
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -1108,6 +1143,7 @@ public class MUCPersistenceManager {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     /**
@@ -1117,7 +1153,7 @@ public class MUCPersistenceManager {
      * @param maxEntriesToWrite maximum number of log entries to write this call.
      */
     public static void saveConversationLogQueue(Queue<ConversationLogEntry> entryQueue, int maxEntriesToWrite) {
-
+        /*
         // early out if nothing to persist
         if (entryQueue.isEmpty()) {
             return;
@@ -1167,6 +1203,7 @@ public class MUCPersistenceManager {
                 DbConnectionManager.closeConnection(pstmt, con);
             }
         }
+        */
     }
 
 
@@ -1191,14 +1228,20 @@ public class MUCPersistenceManager {
      * @param name the name of the property to return.
      * @return the property value specified by name.
      */
-    public static String getProperty(String subdomain, String name) {    	
-    	final MUCServiceProperties newProps = new MUCServiceProperties(subdomain);
-    	final MUCServiceProperties oldProps = propertyMaps.putIfAbsent(subdomain, newProps);
-    	if (oldProps != null) {
-    		return oldProps.get(name);
-    	} else {
-    		return newProps.get(name);
-    	}
+    public static String getProperty(String subdomain, String name) {
+        MUCServiceProperties props = propertyMaps.get(subdomain);
+        if (props == null) {
+            // first property lookup for domain, create new map and handle
+            // potential race condition for creation.
+            final MUCServiceProperties newProps = new MUCServiceProperties(subdomain);
+            final MUCServiceProperties oldProps = propertyMaps.putIfAbsent(subdomain, newProps);
+            if (oldProps != null) {
+                props = oldProps;
+            } else {
+                props = newProps;
+            }
+        }
+        return props.get(name);
     }
 
     /**

@@ -265,6 +265,7 @@ public class MUCServiceProperties implements Map<String, String> {
     }
 
     private void insertProperty(String name, String value) {
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -281,9 +282,11 @@ public class MUCServiceProperties implements Map<String, String> {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     private void updateProperty(String name, String value) {
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -300,9 +303,11 @@ public class MUCServiceProperties implements Map<String, String> {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     private void deleteProperty(String name) {
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -318,9 +323,11 @@ public class MUCServiceProperties implements Map<String, String> {
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     private void loadProperties() {
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -341,5 +348,6 @@ public class MUCServiceProperties implements Map<String, String> {
         finally {
             DbConnectionManager.closeConnection(rs, pstmt, con);
         }
+        */
     }
 }

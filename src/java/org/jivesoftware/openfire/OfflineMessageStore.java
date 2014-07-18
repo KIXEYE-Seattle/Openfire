@@ -120,6 +120,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
      * @param message the message to store.
      */
     public void addMessage(Message message) {
+        /*
         if (message == null) {
             return;
         }
@@ -169,6 +170,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
             size += msgXML.length();
             sizeCache.put(username, size);
         }
+        */
     }
 
     /**
@@ -181,6 +183,8 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
      * @return An iterator of packets containing all offline messages.
      */
     public Collection<OfflineMessage> getMessages(String username, boolean delete) {
+        return Collections.emptyList();
+        /*
         List<OfflineMessage> messages = new ArrayList<OfflineMessage>();
         SAXReader xmlReader = null;
         Connection con = null;
@@ -249,6 +253,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
             }
         }
         return messages;
+        */
     }
 
     /**
@@ -261,6 +266,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
      */
     public OfflineMessage getMessage(String username, Date creationDate) {
         OfflineMessage message = null;
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -298,6 +304,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
             }
             DbConnectionManager.closeConnection(rs, pstmt, con);
         }
+        */
         return message;
     }
 
@@ -307,6 +314,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
      * @param username the username of the user who's messages are going to be deleted.
      */
     public void deleteMessages(String username) {
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -323,6 +331,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     private void removeUsernameFromSizeCache(String username) {
@@ -340,6 +349,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
      * @param creationDate the date when the offline message was stored in the database.
      */
     public void deleteMessage(String username, Date creationDate) {
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
@@ -361,6 +371,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
         finally {
             DbConnectionManager.closeConnection(pstmt, con);
         }
+        */
     }
 
     /**
@@ -375,6 +386,8 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
         if (sizeCache.containsKey(username)) {
             return sizeCache.get(username);
         }
+        return 0;
+        /*
         int size = 0;
         Connection con = null;
         PreparedStatement pstmt = null;
@@ -397,6 +410,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
             DbConnectionManager.closeConnection(rs, pstmt, con);
         }
         return size;
+        */
     }
 
     /**
@@ -407,6 +421,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
      */
     public int getSize() {
         int size = 0;
+        /*
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -424,6 +439,7 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
         finally {
             DbConnectionManager.closeConnection(rs, pstmt, con);
         }
+        */
         return size;
     }
 
@@ -470,6 +486,8 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
      * @return <code>true</code> if the message should be stored offline, <code>false</code> otherwise.
      */
     static boolean shouldStoreMessage(final Message message) {
+        return false;
+        /*
         // XEP-0334: Implement the <no-store/> hint to override offline storage
         if (message.getChildElement("no-store", "urn:xmpp:hints") != null) {
             return false;
@@ -518,5 +536,6 @@ public class OfflineMessageStore extends BasicModule implements UserEventListene
                 break;
         }
         return true;
+        */
     }
 }
