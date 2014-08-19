@@ -568,9 +568,18 @@ public class LocalMUCRoom implements MUCRoom {
             }
             // If another user attempts to join the room with a nickname reserved by the first user
             // raise a ConflictException
-            if (members.containsValue(nickname.toLowerCase())) {
-                if (!nickname.toLowerCase().equals(members.get(bareJID))) {
-                    throw new ConflictException();
+            String lowerNickname = nickname.toLowerCase();
+            if (members.containsValue(lowerNickname)) {
+                if (!lowerNickname.equals(members.get(bareJID))) {
+                    // shouldn't happen so do linear search for the existing user
+                    String foundJID = "<unknown>";
+                    for(Map.Entry<JID, String> kvp : members.entrySet()) {
+                        if (lowerNickname.equals(kvp.getValue())) {
+                            foundJID = kvp.getKey().toBareJID();
+                            break;
+                        }
+                    }
+                    throw new ConflictException("Existing user JID: " + foundJID);
                 }
             }
             if (isLoginRestrictedToNickname()) {
@@ -1509,14 +1518,19 @@ public class LocalMUCRoom implements MUCRoom {
                     throw new ForbiddenException();
                 }
             }
-            // DEBUG check to make sure tables are getting cleaned up
-//            if (members.size() > 1000) {
-//                Log.error("Room " + getName() + " has too many members " + members.size() );
-//            }
             // Check if the desired nickname is already reserved for another member
             if (nickname != null && nickname.trim().length() > 0 && members.containsValue(nickname.toLowerCase())) {
-                if (!nickname.equals(members.get(bareJID))) {
-                    throw new ConflictException();
+                String lowerNickname = nickname.toLowerCase();
+                if (!lowerNickname.equals(members.get(bareJID))) {
+                    // shouldn't happen so do linear search for the existing user
+                    String foundJID = "<unknown>";
+                    for(Map.Entry<JID, String> kvp : members.entrySet()) {
+                        if (lowerNickname.equals(kvp.getValue())) {
+                            foundJID = kvp.getKey().toBareJID();
+                            break;
+                        }
+                    }
+                    throw new ConflictException("Existing user JID: " + foundJID);
                 }
             }
             // Check that the room always has an owner
