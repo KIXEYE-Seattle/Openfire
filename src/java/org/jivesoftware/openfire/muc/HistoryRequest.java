@@ -216,7 +216,8 @@ public class HistoryRequest {
             }
             // Send the smallest amount of traffic to the user
             for (Object aHistoryToSend : historyToSend) {
-                joinRole.send((Message) aHistoryToSend);
+                Message tmp = (Message) aHistoryToSend;
+                joinRole.send(tmp.createCopy());
             }
         }
     }
